@@ -17,7 +17,7 @@ const game = {
 };
 
 const player = {
-    x: 80,
+    x: 150,
     y: game.groundY - 40,
     width: 40,
     height: 40,
@@ -145,6 +145,7 @@ function drawObstacles() {
         ctx.fillRect(obs.x, obs.y, 20, obs.height);
         ctx.fillStyle = '#27632f';
         ctx.fillRect(obs.x, obs.y, 20, 6);
+        
         if (obs.leftarm) {
             ctx.fillRect(obs.x - 10, obs.y + 10, 10, 10);
         }
@@ -170,31 +171,32 @@ function gameLoop() {
 }
 
 window.addEventListener('keydown', event => {
-    if (event.code === 'Space' || event.code === 'ArrowUp') {
+    if ((event.code === 'Space' || event.code === 'ArrowUp') ) {
         event.preventDefault();
-        player.height = 40;
-        player.y = game.groundY - ( player.height+1 );
+
         if (game.gameOver) {
             resetGame();
             return;
         }
+
         if (!player.jumping) {
+            player.height = 40;
+            player.y = game.groundY - ( player.height+1 );
             player.dy = player.jumpPower;
             player.jumping = true;
         }
     }
+
     if (event.code === 'ArrowDown') {
         event.preventDefault();
-        if (game.gameOver) {
-            resetGame();
-            return;
-        }
+
         if (player.jumping) {
             player.dy += 5;
         }
         if (!player.jumping) {
             player.height = 20;
         }
+
     }
 });
 
