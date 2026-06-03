@@ -7,9 +7,9 @@ const game = {
     width: canvas.width,
     height: canvas.height,
     groundY: 240,
-    speed: 6,
+    speed: 1,
     obstacleTimer: 0,
-    obstacleInterval: 90,
+    obstacleInterval: 200,
     obstacles: [],
     score: 0,
     gameOver: false,
@@ -22,15 +22,15 @@ const player = {
     width: 40,
     height: 40,
     dy: 0,
-    jumpPower: -12,
-    gravity: 0.55,
+    jumpPower: -4,
+    gravity: 0.07,
     jumping: false
 };
 
 function resetGame() {
-    game.speed = 6;
+    game.speed = 1;
     game.obstacleTimer = 0;
-    game.obstacleInterval = 90;
+    game.obstacleInterval = 200;
     game.obstacles = [];
     game.score = 0;
     game.gameOver = false;
@@ -43,7 +43,11 @@ function resetGame() {
 }
 
 function spawnObstacle() {
-    const height = Math.random() > 0.45 ? 50 : 30;
+    if (Math.random() > 0.5){
+        height = 50;
+    } else {
+        height = 30;
+    }
     const width = 18 + Math.floor(Math.random() * 12);
     game.obstacles.push({
         x: game.width + 20,
@@ -72,7 +76,7 @@ function update() {
     if (game.obstacleTimer > game.obstacleInterval) {
         game.obstacleTimer = 0;
         spawnObstacle();
-        game.obstacleInterval = 80 + Math.floor(Math.random() * 50);
+        game.obstacleInterval = 200 + Math.floor(Math.random() * 50);
     }
 
     for (let i = game.obstacles.length - 1; i >= 0; i--) {
@@ -93,7 +97,7 @@ function update() {
     }
 
     if (!game.gameOver && game.score % 200 === 0) {
-        game.speed = 6 + Math.floor(game.score / 200);
+        game.speed = 1 + Math.floor(game.score / 200);
     }
 }
 
@@ -145,6 +149,8 @@ function gameLoop() {
 window.addEventListener('keydown', event => {
     if (event.code === 'Space' || event.code === 'ArrowUp') {
         event.preventDefault();
+        player.height = 40;
+        player.y = game.groundY - ( player.height+1 );
         if (game.gameOver) {
             resetGame();
             return;
@@ -153,6 +159,25 @@ window.addEventListener('keydown', event => {
             player.dy = player.jumpPower;
             player.jumping = true;
         }
+    }
+    if (event.code === 'ArrowDown') {
+        event.preventDefault();
+        if (game.gameOver) {
+            resetGame();
+            return;
+        }
+        if (player.jumping) {
+            player.dy += 5;
+        }
+        if (!player.jumping) {
+            player.height = 20;
+        }
+    }
+});
+
+window.addEventListener('keyup', event => {
+    if (event.code === 'ArrowDown') {
+        player.height = 40;
     }
 });
 
