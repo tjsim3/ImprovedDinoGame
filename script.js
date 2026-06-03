@@ -7,13 +7,13 @@ const game = {
     width: canvas.width,
     height: canvas.height,
     groundY: 240,
-    speed: 1,
+    speed: 1.25,
     obstacleTimer: 0,
     obstacleInterval: 200,
     obstacles: [],
     score: 0,
     gameOver: false,
-    started: false
+    started: false,
 };
 
 const player = {
@@ -22,13 +22,13 @@ const player = {
     width: 40,
     height: 40,
     dy: 0,
-    jumpPower: -4,
-    gravity: 0.07,
+    jumpPower: -2.2,
+    gravity: 0.03,
     jumping: false
 };
 
 function resetGame() {
-    game.speed = 1;
+    game.speed = 1.25;
     game.obstacleTimer = 0;
     game.obstacleInterval = 200;
     game.obstacles = [];
@@ -48,20 +48,39 @@ function spawnObstacle() {
     } else {
         height = 30;
     }
-    const width = 18 + Math.floor(Math.random() * 12);
+    const width = 20 + Math.round(Math.random() * 2) * 10;
+
+    if (width == 30) {
+        if (Math.random() > 0.5) {
+            leftarm = true;
+            rightarm = false;
+        } else {
+            leftarm = false;
+            rightarm = true;
+        }
+    } else if (width == 40) {
+        leftarm = true;
+        rightarm = true;
+    } else {
+        leftarm = false;
+        rightarm = false;
+    }
+
     game.obstacles.push({
         x: game.width + 20,
         y: game.groundY - height,
         width,
-        height
+        height,
+        leftarm,
+        rightarm
     });
 }
 
 function update() {
     if (game.gameOver) return;
 
-    game.score += 1;
-    scoreBoard.textContent = 'SCORE: ' + game.score;
+    game.score += 0.25;
+    scoreBoard.textContent = 'SCORE: ' + Math.floor(game.score);
 
     player.dy += player.gravity;
     player.y += player.dy;
@@ -76,17 +95,17 @@ function update() {
     if (game.obstacleTimer > game.obstacleInterval) {
         game.obstacleTimer = 0;
         spawnObstacle();
-        game.obstacleInterval = 200 + Math.floor(Math.random() * 50);
+        game.obstacleInterval = 125 + Math.floor(Math.random() * 175);
     }
 
     for (let i = game.obstacles.length - 1; i >= 0; i--) {
         const obs = game.obstacles[i];
         obs.x -= game.speed;
-        if (obs.x + obs.width < -30) {
+        if (obs.x + 20 < -30) {
             game.obstacles.splice(i, 1);
         }
         if (
-            player.x < obs.x + obs.width &&
+            player.x < obs.x + 20 &&
             player.x + player.width > obs.x &&
             player.y < obs.y + obs.height &&
             player.y + player.height > obs.y
@@ -97,7 +116,7 @@ function update() {
     }
 
     if (!game.gameOver && game.score % 200 === 0) {
-        game.speed = 1 + Math.floor(game.score / 200);
+        game.speed = 1.25 + 0.2 * Math.floor(game.score / 200);
     }
 }
 
@@ -115,19 +134,23 @@ function drawBackground() {
 }
 
 function drawPlayer() {
-    ctx.fillStyle = '#222222';
-    ctx.fillRect(player.x, player.y, player.width, player.height);
-    ctx.fillStyle = '#4a4a4a';
-    ctx.fillRect(player.x + 8, player.y + 8, 24, 8);
-    ctx.fillRect(player.x + 10, player.y + 22, 20, 6);
+    const dinoImg = new Image();
+    dinoImg.src = 'dino.png';
+    ctx.drawImage(dinoImg, player.x, player.y, player.width, player.height);
 }
 
 function drawObstacles() {
     game.obstacles.forEach(obs => {
         ctx.fillStyle = '#3a7d44';
-        ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+        ctx.fillRect(obs.x, obs.y, 20, obs.height);
         ctx.fillStyle = '#27632f';
-        ctx.fillRect(obs.x, obs.y, obs.width, 6);
+        ctx.fillRect(obs.x, obs.y, 20, 6);
+        if (obs.leftarm) {
+            ctx.fillRect(obs.x - 10, obs.y + 10, 10, 10);
+        }
+        if (obs.rightarm) {
+            ctx.fillRect(obs.x + 20, obs.y + 10, 10, 10);
+        }
     });
 }
 
