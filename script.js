@@ -43,36 +43,54 @@ function resetGame() {
 }
 
 function spawnObstacle() {
-    if (Math.random() > 0.5){
-        height = 50;
-    } else {
-        height = 30;
-    }
-    const width = 20 + Math.round(Math.random() * 2) * 10;
+    let obtype = Math.floor(Math.random() * 2) + 1;
+    let x = game.width + 20;
+    let height, width, leftarm, rightarm;
+    let y;
 
-    if (width == 30) {
-        if (Math.random() > 0.5) {
+    if(obtype == 1){
+        if (Math.random() > 0.5){
+            height = 50;
+        } else {
+            height = 30;
+        }
+        width = 20 + Math.round(Math.random() * 2) * 10;
+
+        if (width == 30) {
+            if (Math.random() > 0.5) {
+                leftarm = true;
+                rightarm = false;
+            } else {
+                leftarm = false;
+                rightarm = true;
+            }
+        } else if (width == 40) {
             leftarm = true;
-            rightarm = false;
+            rightarm = true;
         } else {
             leftarm = false;
-            rightarm = true;
+            rightarm = false;
         }
-    } else if (width == 40) {
-        leftarm = true;
-        rightarm = true;
     } else {
+        height = 20;
+        width = 20;
         leftarm = false;
         rightarm = false;
     }
 
+    y = game.groundY - height;
+    if (obtype == 2) {
+        y -= Math.floor(Math.random() * 20) + 20;
+    }
+
     game.obstacles.push({
-        x: game.width + 20,
-        y: game.groundY - height,
+        x,
+        y,
         width,
         height,
         leftarm,
-        rightarm
+        rightarm,
+        obtype
     });
 }
 
@@ -141,16 +159,21 @@ function drawPlayer() {
 
 function drawObstacles() {
     game.obstacles.forEach(obs => {
-        ctx.fillStyle = '#3a7d44';
-        ctx.fillRect(obs.x, obs.y, 20, obs.height);
-        ctx.fillStyle = '#27632f';
-        ctx.fillRect(obs.x, obs.y, 20, 6);
-        
-        if (obs.leftarm) {
-            ctx.fillRect(obs.x - 10, obs.y + 10, 10, 10);
-        }
-        if (obs.rightarm) {
-            ctx.fillRect(obs.x + 20, obs.y + 10, 10, 10);
+        if (obs.obtype == 1) {
+            ctx.fillStyle = '#3a7d44';
+            ctx.fillRect(obs.x, obs.y, 20, obs.height);
+            ctx.fillStyle = '#27632f';
+            ctx.fillRect(obs.x, obs.y, 20, 6);
+            
+            if (obs.leftarm) {
+                ctx.fillRect(obs.x - 10, obs.y + 10, 10, 10);
+            }
+            if (obs.rightarm) {
+                ctx.fillRect(obs.x + 20, obs.y + 10, 10, 10);
+            }
+        } else if (obs.obtype == 2) {
+            ctx.fillStyle = '#8a8a8a';
+            ctx.fillRect(obs.x, obs.y, 20, obs.height);
         }
     });
 }
@@ -187,9 +210,10 @@ window.addEventListener('keydown', event => {
         }
     }
 
-    if (event.code === 'ArrowDown') {
+    if (event.code === 'ArrowDown' && !game.gameOver) {
         event.preventDefault();
 
+        player.y += 20;
         if (player.jumping) {
             player.dy += 5;
         }
