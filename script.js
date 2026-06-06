@@ -78,10 +78,10 @@ function spawnObstacle() {
             obtype = 1;
         }
     }
-    console.log('Spawning obstacle of type:', obtype);
     let x = game.width + 20;
     let height, width, leftarm, rightarm;
     let y;
+    let yvel;
 
     // Type 1: Tall cactus with random height and arms
     if(obtype == 1){
@@ -107,7 +107,9 @@ function spawnObstacle() {
             leftarm = false;
             rightarm = false;
         }
+        width = 20;
         y = game.groundY - height;
+        yvel = null;
     } else if (obtype == 2) {
         // Type 2: Flying rock 
         height = 20;
@@ -116,6 +118,7 @@ function spawnObstacle() {
         rightarm = false;
         y = game.groundY - height;
         y -= Math.floor(Math.random() * 20) + 20;
+        yvel = null;
     } else if (obtype == 3) {
         // Typer 3: Fireball 
         height = 30;
@@ -123,6 +126,7 @@ function spawnObstacle() {
         leftarm = false;
         rightarm = false;
         y = 0;
+        yvel = (Math.random() /2)  + 1.5;
     }
 
 
@@ -133,8 +137,48 @@ function spawnObstacle() {
         height,
         leftarm,
         rightarm,
-        obtype
+        obtype,
+        yvel
     });
+}
+
+function playerHitsObstacle(obs) {
+    const px = player.x;
+    const py = player.y;
+    const scale = player.width / 10; // sprite is 10x10 pixels drawn to 40x40
+
+    const ox1 = obs.x;
+    const oy1 = obs.y;
+    const ox2 = obs.x + obs.width;
+    const oy2 = obs.y + obs.height;
+
+    const overlaps = (ax1, ay1, ax2, ay2) => {
+        return ax1 < ox2 && ax2 > ox1 && ay1 < oy2 && ay2 > oy1;
+    };
+
+    // Row 0: ......oo..
+    if (overlaps(px + 6 * scale, py + 0 * scale, px + 8 * scale, py + 1 * scale)) return true;
+    // Row 1: .....oooo.
+    if (overlaps(px + 5 * scale, py + 1 * scale, px + 9 * scale, py + 2 * scale)) return true;
+    // Row 2: ....oooooo
+    if (overlaps(px + 4 * scale, py + 2 * scale, px + 10 * scale, py + 3 * scale)) return true;
+    // Row 3: ....oooooo
+    if (overlaps(px + 4 * scale, py + 3 * scale, px + 10 * scale, py + 4 * scale)) return true;
+    // Row 4: ....ooooo.
+    if (overlaps(px + 4 * scale, py + 4 * scale, px + 9 * scale, py + 5 * scale)) return true;
+    // Row 5: ...oooo...
+    if (overlaps(px + 3 * scale, py + 5 * scale, px + 7 * scale, py + 6 * scale)) return true;
+    // Row 6: .ooooooo..
+    if (overlaps(px + 1 * scale, py + 6 * scale, px + 8 * scale, py + 7 * scale)) return true;
+    // Row 7: oooooo....
+    if (overlaps(px + 0 * scale, py + 7 * scale, px + 6 * scale, py + 8 * scale)) return true;
+    // Row 8: oooooo....
+    if (overlaps(px + 0 * scale, py + 8 * scale, px + 6 * scale, py + 9 * scale)) return true;
+    // Row 9: ...oo.o...
+    if (overlaps(px + 3 * scale, py + 9 * scale, px + 5 * scale, py + 10 * scale)) return true;
+    if (overlaps(px + 6 * scale, py + 9 * scale, px + 7 * scale, py + 10 * scale)) return true;
+
+    return false;
 }
 
 function update() {
@@ -169,16 +213,11 @@ function update() {
         const obs = game.obstacles[i];
         obs.x -= game.speed * timeScale;
         // Remove obstacles that left the screen
-        if (obs.x + 20 < -30) {
+        if (obs.x + obs.width < -30) {
             game.obstacles.splice(i, 1);
         }
-        // AABB collision detection between player and obstacle
-        if (
-            player.x < obs.x + 20 &&
-            player.x + player.width > obs.x &&
-            player.y < obs.y + obs.height &&
-            player.y + player.height > obs.y
-        ) {
+        // Complex pixel-art collision detection for the dino sprite
+        if (playerHitsObstacle(obs)) {
             game.gameOver = true;
             message.classList.remove('hidden');
         }
@@ -196,7 +235,7 @@ function drawBackground() {
     ctx.fillStyle = '#87c1ff';
     ctx.fillRect(0, 0, game.width, game.height);
     // Ground
-    ctx.fillStyle = '#ffffff';
+    ctx.fillStyle = '#f6ff00';
     ctx.fillRect(0, game.groundY, game.width, game.height - game.groundY);
     // Ground line
     ctx.strokeStyle = '#5e5e5e';
@@ -241,7 +280,7 @@ function drawObstacles() {
             ctx.fill();
             // y position decreases as it moves down the screen
             obs.x -= 6 * (game.speed / 1.25);
-            obs.y += 2.6 * (game.speed / 1.25);
+            obs.y += obs.yvel * (game.speed / 1.25);
         }
     });
 }
