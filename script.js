@@ -61,8 +61,8 @@ function resetGame() {
 function spawnObstacle() {
     let obtype;
     const rand = Math.random();
-    if (game.score < 25000) {
-        if (rand < 0.1 * game.score / 25000) {
+    if (game.score < (2500/3)) {
+        if (rand < 0.1 * game.score / (2500/3)) {
             obtype = 3; 
         } else if (rand < 0.4) {
             obtype = 2;
@@ -143,7 +143,7 @@ function update() {
     const timeScale = deltaTime / BASE_FRAME_TIME; // Normalize time to 60 FPS baseline
     
     // ===== PLAYER PHYSICS =====
-    game.score += 0.25 * timeScale;
+    game.score += 0.075 * timeScale;
     scoreBoard.textContent = 'SCORE: ' + Math.floor(game.score);
 
     player.dy += player.gravity * timeScale;
