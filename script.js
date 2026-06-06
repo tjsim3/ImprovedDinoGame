@@ -57,9 +57,28 @@ function resetGame() {
     message.classList.add('hidden');
 }
 
-// Create a random obstacle (type 1: tall cactus with arms, type 2: flying rock)
+// Create a random obstacle (type 1: tall cactus with arms, type 2: flying rock, type 3: fireball)
 function spawnObstacle() {
-    let obtype = Math.floor(Math.random() * 2) + 1;
+    let obtype;
+    const rand = Math.random();
+    if (game.score < 25000) {
+        if (rand < 0.1 * game.score / 25000) {
+            obtype = 3; 
+        } else if (rand < 0.4) {
+            obtype = 2;
+        } else {
+            obtype = 1;
+        }
+    } else {
+        if (rand < 0.1) {
+            obtype = 3;
+        } else if (rand < 0.4) {
+            obtype = 2;
+        } else {
+            obtype = 1;
+        }
+    }
+    console.log('Spawning obstacle of type:', obtype);
     let x = game.width + 20;
     let height, width, leftarm, rightarm;
     let y;
@@ -88,19 +107,24 @@ function spawnObstacle() {
             leftarm = false;
             rightarm = false;
         }
-    } else {
-        // Type 2: Flying rock (smaller obstacle)
+        y = game.groundY - height;
+    } else if (obtype == 2) {
+        // Type 2: Flying rock 
         height = 20;
         width = 20;
         leftarm = false;
         rightarm = false;
+        y = game.groundY - height;
+        y -= Math.floor(Math.random() * 20) + 20;
+    } else if (obtype == 3) {
+        // Typer 3: Fireball 
+        height = 30;
+        width = 30;
+        leftarm = false;
+        rightarm = false;
+        y = 0;
     }
 
-    y = game.groundY - height;
-    // Flying rocks spawn higher than ground-level obstacles
-    if (obtype == 2) {
-        y -= Math.floor(Math.random() * 20) + 20;
-    }
 
     game.obstacles.push({
         x,
@@ -209,6 +233,15 @@ function drawObstacles() {
             // Draw flying rock
             ctx.fillStyle = '#8a8a8a';
             ctx.fillRect(obs.x, obs.y, 20, obs.height);
+        } else if (obs.obtype == 3) {
+            // Draw fireball
+            ctx.fillStyle = '#ff4500';
+            ctx.beginPath();
+            ctx.arc(obs.x + 15, obs.y + 15, 15, 0, Math.PI * 2);
+            ctx.fill();
+            // y position decreases as it moves down the screen
+            obs.x -= 6 * (game.speed / 1.25);
+            obs.y += 2.6 * (game.speed / 1.25);
         }
     });
 }
