@@ -1,6 +1,91 @@
+/*import { initializeApp } from "firebase/app";
+import { getAnalytics } from "firebase/analytics";
+import { 
+    getAuth, 
+    signInAnonymously, 
+    onAuthStateChanged 
+} from "firebase/auth";
+import {
+  getFirestore,
+  collection,
+  addDoc,
+  getDocs,
+  query,
+  orderBy,
+  limit,
+  serverTimestamp
+} from "firebase/firestore";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCkzOLdZWuYo1SXBsb1ZNTaF9JjBB0YqgM",
+  authDomain: "dinogame-affb7.firebaseapp.com",
+  projectId: "dinogame-affb7",
+  storageBucket: "dinogame-affb7.firebasestorage.app",
+  messagingSenderId: "101872105597",
+  appId: "1:101872105597:web:469611e93a3a59c1071914",
+  measurementId: "G-X78XS9MLZC"
+};
+
+// ===== FIREBASE INIT =====
+/*const app = initializeApp(firebaseConfig);
+const analytics = getAnalytics(app);
+
+// Firestore + Auth (leaderboard)
+const db = getFirestore(app);
+const auth = getAuth();
+
+// Try anonymous sign-in so clients can write scores under auth.uid
+signInAnonymously(auth).catch(() => {});
+
+onAuthStateChanged(auth, (user) => {
+    // Refresh leaderboard when auth state settles
+    refreshLeaderboard().catch(() => {});
+});
+
+async function refreshLeaderboard() {
+    try {
+        const q = query(collection(db, 'scores'), orderBy('score', 'desc'), limit(5));
+        const snap = await getDocs(q);
+        const list = document.getElementById('leaderboardList');
+        if (!list) return;
+        list.innerHTML = '';
+        if (snap.empty) {
+            list.innerHTML = '<li>No scores yet</li>';
+            return;
+        }
+        snap.forEach(doc => {
+            const d = doc.data();
+            const li = document.createElement('li');
+            const id = d.playerId ? String(d.playerId).substring(0, 6) : 'anon';
+            li.textContent = `${id} — ${d.score}`;
+            list.appendChild(li);
+        });
+    } catch (e) {
+        console.error('refreshLeaderboard failed', e);
+        const list = document.getElementById('leaderboardList');
+        if (list) list.innerHTML = '<li class="error">Failed to load</li>';
+    }
+}
+
+async function submitScore(score) {
+    try {
+        if (!auth.currentUser) {
+            await signInAnonymously(auth);
+        }
+        await addDoc(collection(db, 'scores'), {
+            playerId: auth.currentUser ? auth.currentUser.uid : 'unknown',
+            score: Math.floor(score),
+            createdAt: serverTimestamp()
+        });
+        await refreshLeaderboard();
+    } catch (e) {
+        console.warn('submitScore failed', e);
+    }
+}
+*/
 // ===== DOM ELEMENTS =====
 const canvas = document.getElementById('gameCanvas');
-const ctx = canvas.getContext('2d');
+const ctx = canvas ? canvas.getContext('2d') : null;
 const scoreBoard = document.getElementById('scoreBoard');
 const message = document.getElementById('message');
 
@@ -215,11 +300,14 @@ function update() {
         // Remove obstacles that left the screen
         if (obs.x + obs.width < -30) {
             game.obstacles.splice(i, 1);
+            continue;
         }
         // Complex pixel-art collision detection for the dino sprite
         if (playerHitsObstacle(obs)) {
             game.gameOver = true;
             message.classList.remove('hidden');
+            try { submitScore(game.score); } catch (e) { /* swallow */ }
+            break;
         }
     }
 
@@ -356,3 +444,4 @@ window.addEventListener('resize', () => {
 
 resetGame();
 gameLoop();
+//refreshLeaderboard().catch(() => {});
