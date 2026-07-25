@@ -1,4 +1,4 @@
-/*import { initializeApp } from "firebase/app";
+import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
 import { 
     getAuth, 
@@ -27,7 +27,7 @@ const firebaseConfig = {
 };
 
 // ===== FIREBASE INIT =====
-/*const app = initializeApp(firebaseConfig);
+const app = initializeApp(firebaseConfig);
 const analytics = getAnalytics(app);
 
 // Firestore + Auth (leaderboard)
@@ -72,17 +72,25 @@ async function submitScore(score) {
         if (!auth.currentUser) {
             await signInAnonymously(auth);
         }
+
+        const playerLabel = auth.currentUser ? auth.currentUser.uid.slice(0, 8) : 'anon';
+
         await addDoc(collection(db, 'scores'), {
-            playerId: auth.currentUser ? auth.currentUser.uid : 'unknown',
+            playerId: playerLabel,
             score: Math.floor(score),
             createdAt: serverTimestamp()
         });
+
         await refreshLeaderboard();
     } catch (e) {
-        console.warn('submitScore failed', e);
+        console.error('submitScore failed:', e);
+        const list = document.getElementById('leaderboardList');
+        if (list) {
+            list.innerHTML = '<li class="error">Score could not be saved</li>';
+        }
     }
 }
-*/
+
 // ===== DOM ELEMENTS =====
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas ? canvas.getContext('2d') : null;
