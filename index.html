@@ -8,13 +8,36 @@
 </head>
 <body>
 <div id="gameWrapper">
+    <div id="selectScreen">
+        <h2>Choose Your Dinosaur</h2>
+        <p>Pick a dino to set your running style.</p>
+        <div id="dinoOptions">
+            <button class="dinoOption" data-dino="trex">
+                <span class="dinoName">T-Rex</span>
+                <span class="dinoDesc">Classic run &amp; jump</span>
+            </button>
+            <button class="dinoOption" data-dino="pterodactyl">
+                <span class="dinoName">Pterodactyl</span>
+                <span class="dinoDesc">Fly &amp; dodge flying foes</span>
+            </button>
+            <button class="dinoOption" data-dino="stegosaurus">
+                <span class="dinoName">Stegosaurus</span>
+                <span class="dinoDesc">Slow &amp; eat cacti for points</span>
+            </button>
+        </div>
+    </div>
     <div id="scoreBoard">SCORE: 0</div>
     <div id="message" class="hidden">
         <h1>GAME OVER</h1>
         <p>Press SPACE or UP to restart</p>
+        <button id="switchDino" type="button">Switch Dino</button>
     </div>
     <aside id="leaderboard">
         <h2>Top 5</h2>
+        <div id="nameBox">
+            <label for="playerName">Name</label>
+            <input id="playerName" type="text" maxlength="8" autocomplete="off" spellcheck="false" placeholder="8 chars">
+        </div>
         <ul id="leaderboardList">
             <li class="loading">Loading...</li>
         </ul>
