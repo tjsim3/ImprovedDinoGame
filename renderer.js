@@ -4,6 +4,24 @@
 
 import { DINOS } from './state.js';
 
+// Cached red-tinted, flippable sprite for enemy pterodactyls
+let enemyPteroCache = null;
+
+function getEnemyPteroSprite(pteroImg) {
+    if (!pteroImg || !pteroImg.width) return null;
+    if (enemyPteroCache) return enemyPteroCache;
+    const c = document.createElement('canvas');
+    c.width = pteroImg.width;
+    c.height = pteroImg.height;
+    const cx = c.getContext('2d');
+    cx.drawImage(pteroImg, 0, 0);
+    cx.globalCompositeOperation = 'source-atop';
+    cx.fillStyle = '#c0392b';
+    cx.fillRect(0, 0, c.width, c.height);
+    enemyPteroCache = c;
+    return c;
+}
+
 function drawBackground(ctx, game) {
     // Sky
     ctx.fillStyle = '#87c1ff';
@@ -136,8 +154,15 @@ function drawObstacles(ctx, game, pteroImg) {
                 ctx.fill();
             }
         } else if (obs.obtype == 5) {
-            // Draw enemy pterodactyl
-            ctx.drawImage(pteroImg, obs.x, obs.y, 40, 40);
+            // Draw enemy pterodactyl: red version of the player sprite, flipped to face left
+            const sprite = getEnemyPteroSprite(pteroImg);
+            if (sprite) {
+                ctx.save();
+                ctx.translate(obs.x + 40, obs.y);
+                ctx.scale(-1, 1);
+                ctx.drawImage(sprite, 0, 0, 40, 40);
+                ctx.restore();
+            }
         }
     });
 }
