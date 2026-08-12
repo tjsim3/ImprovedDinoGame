@@ -12,6 +12,9 @@ import {
     FLIGHT_Y0,
     CACTUS_BONUS,
     FIREBALL_SPEED,
+    ROCK_GRAVITY,
+    ROCK_BOUNCE,
+    ROCK_THROW_SPEED,
 } from './state.js';
 import { submitScore } from './firebase.js';
 
@@ -114,18 +117,13 @@ function spawnObstacle() {
         y = game.groundY - height;
         yvel = null;
     } else if (obtype == 2) {
-        // Type 2: Flying rock
+        // Type 2: Flying rock - thrown upward from the ground, arcs then bounces
         height = 20;
         width = 20;
         leftarm = false;
         rightarm = false;
         y = game.groundY - height;
-        if (game.mode === 'pterodactyl') {
-            y = FLIGHT_MIN_Y + Math.random() * (game.groundY - player.height - 40 - FLIGHT_MIN_Y);
-        } else {
-            y -= Math.floor(Math.random() * 20) + 20;
-        }
-        yvel = null;
+        yvel = -(2 + Math.random() * 3);
     } else if (obtype == 3) {
         // Type 3: Fireball
         height = 30;
@@ -276,9 +274,20 @@ function update(timeScale) {
         } else {
             obs.x -= game.speed * timeScale;
         }
+        // Thrown rocks arc upward then bounce off the ground
+        if (obs.obtype == 2) {
+            obs.x -= ROCK_THROW_SPEED * timeScale;
+            obs.yvel += ROCK_GRAVITY * timeScale;
+            obs.y += obs.yvel * timeScale;
+            if (obs.y + obs.height >= game.groundY) {
+                obs.y = game.groundY - obs.height;
+                obs.yvel = -obs.yvel * ROCK_BOUNCE;
+                if (Math.abs(obs.yvel) < 0.12) obs.yvel = 0;
+            }
+        }
         // Flying enemies bob up and down
         if (obs.obtype == 5 && obs.baseY != null) {
-            obs.y = obs.baseY + Math.sin(game.score / 40) * 6;
+            obs.y = obs.baseY + Math.sin(game.score / 20) * 40;
         }
         // Remove obstacles that left the screen
         if (obs.x + obs.width < -30) {

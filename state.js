@@ -52,6 +52,9 @@ const FLIGHT_SPEED = 2.4;
 const FLIGHT_Y0 = 120;
 const CACTUS_BONUS = 25;
 const FIREBALL_SPEED = 2; // fireball travel speed toward the player (fast enough to threaten, slow enough to dodge)
+const ROCK_GRAVITY = 0.04; // gravity applied to thrown rocks
+const ROCK_BOUNCE = 0.55;  // fraction of vertical speed kept after a rock hits the ground
+const ROCK_THROW_SPEED = 2.0; // extra horizontal speed of a thrown rock beyond world scroll
 
 // ===== PLAYER STATE =====
 const player = {
@@ -80,4 +83,7 @@ export {
     FLIGHT_Y0,
     CACTUS_BONUS,
     FIREBALL_SPEED,
+    ROCK_GRAVITY,
+    ROCK_BOUNCE,
+    ROCK_THROW_SPEED,
 };
