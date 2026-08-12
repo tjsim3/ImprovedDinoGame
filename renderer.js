@@ -84,18 +84,18 @@ function drawStegosaurus(ctx, player) {
     ctx.fill();
 }
 
-function drawPlayer(ctx, game, player, dinoImg) {
+function drawPlayer(ctx, game, player, dinoImg, pteroImg) {
     const sprite = DINOS[game.mode] ? DINOS[game.mode].sprite : 'trex';
     if (sprite === 'trex') {
         ctx.drawImage(dinoImg, player.x, player.y, player.width, player.height);
     } else if (sprite === 'ptero') {
-        drawPterodactyl(ctx, player);
+        ctx.drawImage(pteroImg, player.x, player.y, player.width, player.height);
     } else {
         drawStegosaurus(ctx, player);
     }
 }
 
-function drawObstacles(ctx, game) {
+function drawObstacles(ctx, game, pteroImg) {
     game.obstacles.forEach(obs => {
         if (obs.obtype == 1) {
             // Draw cactus body
@@ -137,34 +137,16 @@ function drawObstacles(ctx, game) {
             }
         } else if (obs.obtype == 5) {
             // Draw enemy pterodactyl
-            const bob = Math.sin(game.score / 40) * 3;
-            ctx.fillStyle = '#c0392b';
-            ctx.beginPath();
-            ctx.ellipse(obs.x + obs.width / 2, obs.y + obs.height / 2, obs.width / 2, obs.height / 2, 0, 0, Math.PI * 2);
-            ctx.fill();
-            ctx.fillStyle = '#7b241c';
-            ctx.beginPath();
-            ctx.moveTo(obs.x + obs.width / 2, obs.y + obs.height / 2);
-            ctx.lineTo(obs.x + obs.width / 2 - 12, obs.y - 8 - bob);
-            ctx.lineTo(obs.x + obs.width / 2 - 12, obs.y + obs.height - 6 - bob);
-            ctx.closePath();
-            ctx.fill();
-            ctx.fillStyle = '#d4ac0d';
-            ctx.beginPath();
-            ctx.moveTo(obs.x, obs.y + obs.height / 2);
-            ctx.lineTo(obs.x - 8, obs.y + obs.height / 2 + 2);
-            ctx.lineTo(obs.x, obs.y + obs.height / 2 + 6);
-            ctx.closePath();
-            ctx.fill();
+            ctx.drawImage(pteroImg, obs.x, obs.y, 40, 40);
         }
     });
 }
 
-function render(ctx, game, player, dinoImg) {
+function render(ctx, game, player, dinoImg, pteroImg) {
     // Render all game visuals
     drawBackground(ctx, game);
-    drawPlayer(ctx, game, player, dinoImg);
-    drawObstacles(ctx, game);
+    drawPlayer(ctx, game, player, dinoImg, pteroImg);
+    drawObstacles(ctx, game, pteroImg);
 }
 
 export { render };

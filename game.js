@@ -49,8 +49,9 @@ function pickObstacleType() {
     const mode = game.mode;
 
     if (mode === 'pterodactyl') {
-        if (rand < 0.4) return 5;       // enemy pterodactyl
-        if (rand < 0.85) return 2;      // flying rock
+        if (rand < 0.3) return 5;       // enemy pterodactyl
+        if (rand < 0.6) return 2;      // flying rock
+        if (rand < 0.9) return 1;
         return 3;                       // fireball
     }
 
@@ -258,7 +259,11 @@ function update(timeScale) {
     if (game.obstacleTimer > game.obstacleInterval) {
         game.obstacleTimer = 0;
         spawnObstacle();
-        game.obstacleInterval = 125 + Math.floor(Math.random() * 175);
+        if (game.mode === 'pterodactyl'){
+            game.obstacleInterval = 125 + Math.floor(Math.random() * 350);  
+        } else {
+            game.obstacleInterval = 125 + Math.floor(Math.random() * 175);        
+        }
     }
 
     // ===== OBSTACLE MOVEMENT & COLLISION =====
