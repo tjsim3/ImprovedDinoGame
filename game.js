@@ -54,26 +54,28 @@ function pickObstacleType() {
     if (mode === 'pterodactyl') {
         if (rand < 0.3) return 5;       // enemy pterodactyl
         if (rand < 0.6) return 2;      // flying rock
-        if (rand < 0.9) return 1;
+        if (rand < 0.9) return 1;       // cactus
         return 3;                       // fireball
     }
 
     if (mode === 'stegosaurus') {
-        const fireballChance = 0.05 + Math.min(0.2, game.score / 25000);
-        if (rand < fireballChance) return 3;          // fireball
-        if (rand < fireballChance + 0.25) return 4;   // spike rock
-        if (rand < fireballChance + 0.5) return 2;    // flying rock
-        return 1;                                     // cactus (edible)
+        const fireballChance = 0.01 + Math.min(0.2, game.score / 25000);
+        if (rand < fireballChance) return 3;
+        if (rand < fireballChance + 0.1) return 1;
+        if (rand < fireballChance + 0.7) return 4;
+        return 5;
     }
 
     // T-Rex keeps the original distribution
     if (game.score < (2500 / 3)) {
         if (rand < 0.1 * game.score / (2500 / 3)) return 3;
         if (rand < 0.4) return 5;
+        if (rand < 0.6) return 4;
         return 1;
     }
     if (rand < 0.1) return 3;
     if (rand < 0.4) return 5;
+    if (rand < 0.6) return 4;
     return 1;
 }
 
@@ -140,8 +142,8 @@ function spawnObstacle() {
         dirY = dy / len;
     } else if (obtype == 4) {
         // Type 4: Spike rock (cannot be eaten)
-        height = 35;
-        width = 28;
+        height = 20 + Math.random() * 15;
+        width = 20 + Math.random() * 10;
         leftarm = false;
         rightarm = false;
         y = game.groundY - height;
@@ -283,14 +285,16 @@ function update(timeScale) {
     }
 
     // ===== OBSTACLE SPAWNING =====
-    game.obstacleTimer += timeScale;
+    // Advance the spawn timer by world speed so obstacles spawn more often
+    // as the player moves faster, keeping spacing consistent.
+    game.obstacleTimer += timeScale * game.speed;
     if (game.obstacleTimer > game.obstacleInterval) {
         game.obstacleTimer = 0;
         spawnObstacle();
         if (game.mode === 'pterodactyl'){
             game.obstacleInterval = 125 + Math.floor(Math.random() * 350);  
         } else {
-            game.obstacleInterval = 125 + Math.floor(Math.random() * 175);        
+            game.obstacleInterval = Math.max(75, (125 - game.score / 100)) + Math.floor(Math.random() * 175);        
         }
     }
 
