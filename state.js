@@ -9,6 +9,7 @@ const game = {
     speed: 1.25,
     obstacleTimer: 0,
     obstacleInterval: 200,
+    spawnGrace: 0,
     obstacles: [],
     score: 0,
     gameOver: false,
@@ -72,10 +73,22 @@ const player = {
 // Tracks whether a movement key is being held down (used for flight control)
 const keys = { up: false, down: false };
 
+// ===== WEATHER STATE =====
+// Purely visual weather. 'elapsed'/'duration' are in base-frame units and are
+// advanced by game.js; renderer.js reads the state and fades effects via 'fade'.
+const weather = {
+    type: 'sunny', // sunny | rain | snow | fog | night | lightning
+    intensity: 1,
+    elapsed: 0,
+    duration: 2400,
+    fade: 1,
+};
+
 export {
     game,
     player,
     keys,
+    weather,
     DINOS,
     BASE_FRAME_TIME,
     FLIGHT_MIN_Y,

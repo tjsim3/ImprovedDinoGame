@@ -6,6 +6,7 @@ import {
     game,
     player,
     keys,
+    weather,
     DINOS,
     FLIGHT_MIN_Y,
     FLIGHT_SPEED,
@@ -22,12 +23,42 @@ import { submitScore } from './firebase.js';
 const scoreBoard = document.getElementById('scoreBoard');
 const message = document.getElementById('message');
 
+// ===== WEATHER =====
+const WEATHER_TYPES = ['sunny', 'rain', 'snow', 'fog', 'night', 'lightning'];
+
+function pickWeatherType() {
+    const candidates = WEATHER_TYPES.filter(t => t !== weather.type);
+    return candidates[Math.floor(Math.random() * candidates.length)];
+}
+
+// Advance the weather clock and swap to a new random condition when the
+// current one expires. Effects stay purely visual: difficulty comes from the
+// distraction of changing visibility.
+function updateWeather(timeScale) {
+    weather.elapsed += timeScale;
+    const fadeIn = 350;
+    const fadeOut = 350;
+    let fade = 1;
+    if (weather.elapsed < fadeIn) fade = weather.elapsed / fadeIn;
+    const remaining = weather.duration - weather.elapsed;
+    if (remaining < fadeOut) fade = Math.min(fade, remaining / fadeOut);
+    weather.fade = Math.max(0, Math.min(1, fade));
+
+    if (weather.elapsed >= weather.duration) {
+        weather.type = pickWeatherType();
+        weather.elapsed = 0;
+        weather.duration = 6000 + Math.random() * 4000;
+        weather.intensity = 0.75 + Math.random() * 0.45;
+    }
+}
+
 // Reset game to initial state
 function resetGame() {
     const cfg = DINOS[game.mode];
     game.speed = cfg.walkSpeed;
     game.obstacleTimer = 0;
     game.obstacleInterval = 200;
+    game.spawnGrace = 500; // ~2s breathing room before the first obstacle
     game.obstacles = [];
     game.score = 0;
     game.gameOver = false;
@@ -261,6 +292,8 @@ function update(timeScale) {
 
     const cfg = DINOS[game.mode];
 
+    updateWeather(timeScale);
+
     // ===== PLAYER PHYSICS =====
     game.score += 0.075 * timeScale;
     scoreBoard.textContent = 'SCORE: ' + Math.floor(game.score);
@@ -285,16 +318,25 @@ function update(timeScale) {
     }
 
     // ===== OBSTACLE SPAWNING =====
-    // Advance the spawn timer by world speed so obstacles spawn more often
-    // as the player moves faster, keeping spacing consistent.
-    game.obstacleTimer += timeScale * game.speed;
-    if (game.obstacleTimer > game.obstacleInterval) {
-        game.obstacleTimer = 0;
-        spawnObstacle();
-        if (game.mode === 'pterodactyl'){
-            game.obstacleInterval = 125 + Math.floor(Math.random() * 350);  
-        } else {
-            game.obstacleInterval = Math.max(75, (125 - game.score / 100)) + Math.floor(Math.random() * 175);        
+    // Grace period at the start of each run: no obstacles spawn for ~2s.
+    // After that, advance the spawn timer by world speed so obstacles spawn
+    // more often as the player moves faster, keeping spacing consistent.
+    if (game.spawnGrace > 0) {
+        game.spawnGrace -= timeScale;
+    } else {
+        game.obstacleTimer += timeScale * game.speed;
+        if (game.obstacleTimer > game.obstacleInterval) {
+            game.obstacleTimer = 0;
+            spawnObstacle();
+            if (game.mode === 'pterodactyl'){
+                game.obstacleInterval = 125 + Math.floor(Math.random() * 350);  
+            } else {
+                // Gentler start: early intervals are stretched, easing down to
+                // normal cadence as the score climbs.
+                const ramp = Math.min(1, game.score / 500);
+                const factor = 1 + (1 - ramp) * 0.7;
+                game.obstacleInterval = Math.round((Math.max(75, (125 - game.score / 100)) + Math.floor(Math.random() * 175)) * factor);        
+            }
         }
     }
 
