@@ -1,0 +1,1 @@
+A game I created for fun using JS, HTML and CSS. I wanted to learn about databases and backend + authentication so I used firebase. A lot of this was coded using Deepseek V4 Flash Free on opencode, but all was checked by a human also known as me.
