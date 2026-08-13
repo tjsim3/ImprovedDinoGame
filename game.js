@@ -203,6 +203,18 @@ const HITBOXES = {
         "..........",
         "..........",
     ],
+    stegosaurus: [
+        "..........",
+        "..........",
+        "..........",
+        "..........",
+        "....o.....",
+        "...ooo.oo.",
+        "..oooooooo",
+        ".ooooooooo",
+        "ooooooooo.",
+        "...oo.oo..",
+    ],
 };
 
 // Pixel-art collision: overlaps the obstacle against every solid cell of the

@@ -102,14 +102,14 @@ function drawStegosaurus(ctx, player) {
     ctx.fill();
 }
 
-function drawPlayer(ctx, game, player, dinoImg, pteroImg) {
+function drawPlayer(ctx, game, player, dinoImg, pteroImg, stegImg) {
     const sprite = DINOS[game.mode] ? DINOS[game.mode].sprite : 'trex';
     if (sprite === 'trex') {
         ctx.drawImage(dinoImg, player.x, player.y, player.width, player.height);
     } else if (sprite === 'ptero') {
         ctx.drawImage(pteroImg, player.x, player.y, player.width, player.height);
     } else {
-        drawStegosaurus(ctx, player);
+        ctx.drawImage(stegImg, player.x, player.y, player.width, player.height);
     }
 }
 
@@ -167,10 +167,10 @@ function drawObstacles(ctx, game, pteroImg) {
     });
 }
 
-function render(ctx, game, player, dinoImg, pteroImg) {
+function render(ctx, game, player, dinoImg, pteroImg, stegImg) {
     // Render all game visuals
     drawBackground(ctx, game);
-    drawPlayer(ctx, game, player, dinoImg, pteroImg);
+    drawPlayer(ctx, game, player, dinoImg, pteroImg, stegImg);
     drawObstacles(ctx, game, pteroImg);
 }
 

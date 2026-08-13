@@ -32,6 +32,8 @@ const dinoImg = new Image();
 dinoImg.src = 'dino.png';
 const pteroImg = new Image();
 pteroImg.src = 'pterodactyl.png';
+const stegImg = new Image();
+stegImg.src = 'stegosaurus.png';
 
 // ===== TIMING SYSTEM (frame-rate independent movement) =====
 // Track elapsed time to ensure same speed on all frame rates
@@ -74,7 +76,7 @@ function gameLoop() {
         resetGame();
     }
     update(timeScale);
-    render(ctx, game, player, dinoImg, pteroImg);
+    render(ctx, game, player, dinoImg, pteroImg, stegImg);
     requestAnimationFrame(gameLoop);
 }
 
