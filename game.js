@@ -177,10 +177,42 @@ function spawnObstacle() {
     });
 }
 
-function playerHitsObstacle(obs) {
+// Pixel hitboxes as 10x10 grids (". " empty, "o" solid), keyed by dino mode
+const HITBOXES = {
+    trex: [
+        "......oo..",
+        ".....oooo.",
+        "....oooooo",
+        "....oooooo",
+        "....ooooo.",
+        "...oooo...",
+        ".ooooooo..",
+        "oooooo....",
+        "oooooo....",
+        "...oo.o...",
+    ],
+    pterodactyl: [
+        "..........",
+        "oo.ooo....",
+        "ooo.oooo..",
+        ".ooooooooo",
+        ".ooooooo..",
+        "..ooo.....",
+        ".ooooo....",
+        "oo..oo....",
+        "..........",
+        "..........",
+    ],
+};
+
+// Pixel-art collision: overlaps the obstacle against every solid cell of the
+// player type's hitbox, scaled to the player's current on-screen size
+function playerHitsObstacle(obs, playerType) {
+    const hitbox = HITBOXES[playerType] || HITBOXES.trex;
     const px = player.x;
     const py = player.y;
-    const scale = player.width / 10; // sprite is 10x10 pixels drawn to 40x40
+    const scaleX = player.width / hitbox[0].length;
+    const scaleY = player.height / hitbox.length;
 
     const ox1 = obs.x;
     const oy1 = obs.y;
@@ -191,62 +223,8 @@ function playerHitsObstacle(obs) {
         return ax1 < ox2 && ax2 > ox1 && ay1 < oy2 && ay2 > oy1;
     };
 
-    // Row 0: ......oo..
-    if (overlaps(px + 6 * scale, py + 0 * scale, px + 8 * scale, py + 1 * scale)) return true;
-    // Row 1: .....oooo.
-    if (overlaps(px + 5 * scale, py + 1 * scale, px + 9 * scale, py + 2 * scale)) return true;
-    // Row 2: ....oooooo
-    if (overlaps(px + 4 * scale, py + 2 * scale, px + 10 * scale, py + 3 * scale)) return true;
-    // Row 3: ....oooooo
-    if (overlaps(px + 4 * scale, py + 3 * scale, px + 10 * scale, py + 4 * scale)) return true;
-    // Row 4: ....ooooo.
-    if (overlaps(px + 4 * scale, py + 4 * scale, px + 9 * scale, py + 5 * scale)) return true;
-    // Row 5: ...oooo...
-    if (overlaps(px + 3 * scale, py + 5 * scale, px + 7 * scale, py + 6 * scale)) return true;
-    // Row 6: .ooooooo..
-    if (overlaps(px + 1 * scale, py + 6 * scale, px + 8 * scale, py + 7 * scale)) return true;
-    // Row 7: oooooo....
-    if (overlaps(px + 0 * scale, py + 7 * scale, px + 6 * scale, py + 8 * scale)) return true;
-    // Row 8: oooooo....
-    if (overlaps(px + 0 * scale, py + 8 * scale, px + 6 * scale, py + 9 * scale)) return true;
-    // Row 9: ...oo.o...
-    if (overlaps(px + 3 * scale, py + 9 * scale, px + 5 * scale, py + 10 * scale)) return true;
-    if (overlaps(px + 6 * scale, py + 9 * scale, px + 7 * scale, py + 10 * scale)) return true;
-
-    return false;
-}
-
-// Pterodactyl pixel hitbox (10x10 grid; "." empty, "o" solid)
-const PTERO_HITBOX = [
-    "..........",
-    "oo.ooo....",
-    "ooo.oooo..",
-    ".ooooooooo",
-    ".ooooooo..",
-    "..ooo.....",
-    ".ooooo....",
-    "oo..oo....",
-    "..........",
-    "..........",
-];
-
-function playerPteroHitsObstacle(obs) {
-    const px = player.x;
-    const py = player.y;
-    const scaleX = player.width / PTERO_HITBOX[0].length;
-    const scaleY = player.height / PTERO_HITBOX.length;
-
-    const ox1 = obs.x;
-    const oy1 = obs.y;
-    const ox2 = obs.x + obs.width;
-    const oy2 = obs.y + obs.height;
-
-    const overlaps = (ax1, ay1, ax2, ay2) => {
-        return ax1 < ox2 && ax2 > ox1 && ay1 < oy2 && ay2 > oy1;
-    };
-
-    for (let r = 0; r < PTERO_HITBOX.length; r++) {
-        const row = PTERO_HITBOX[r];
+    for (let r = 0; r < hitbox.length; r++) {
+        const row = hitbox[r];
         for (let c = 0; c < row.length; c++) {
             if (row[c] === 'o') {
                 if (overlaps(px + c * scaleX, py + r * scaleY,
@@ -259,12 +237,8 @@ function playerPteroHitsObstacle(obs) {
     return false;
 }
 
-// Collision depends on the dino: flying dinos use their pixel hitbox, others use the tread hitbox
 function collides(obs) {
-    if (DINOS[game.mode].flight) {
-        return playerPteroHitsObstacle(obs);
-    }
-    return playerHitsObstacle(obs);
+    return playerHitsObstacle(obs, game.mode);
 }
 
 // Advance the simulation one frame. timeScale normalizes movement to 60 FPS.
