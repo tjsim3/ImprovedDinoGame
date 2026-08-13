@@ -212,13 +212,53 @@ function playerHitsObstacle(obs) {
     return false;
 }
 
-// Collision depends on the dino: flying dinos use a simple box, others use pixel-art hitbox
+// Pterodactyl pixel hitbox (10x10 grid; "." empty, "o" solid)
+const PTERO_HITBOX = [
+    "..........",
+    "oo.ooo....",
+    "ooo.oooo..",
+    ".ooooooooo",
+    ".ooooooo..",
+    "..ooo.....",
+    ".ooooo....",
+    "oo..oo....",
+    "..........",
+    "..........",
+];
+
+function playerPteroHitsObstacle(obs) {
+    const px = player.x;
+    const py = player.y;
+    const scaleX = player.width / PTERO_HITBOX[0].length;
+    const scaleY = player.height / PTERO_HITBOX.length;
+
+    const ox1 = obs.x;
+    const oy1 = obs.y;
+    const ox2 = obs.x + obs.width;
+    const oy2 = obs.y + obs.height;
+
+    const overlaps = (ax1, ay1, ax2, ay2) => {
+        return ax1 < ox2 && ax2 > ox1 && ay1 < oy2 && ay2 > oy1;
+    };
+
+    for (let r = 0; r < PTERO_HITBOX.length; r++) {
+        const row = PTERO_HITBOX[r];
+        for (let c = 0; c < row.length; c++) {
+            if (row[c] === 'o') {
+                if (overlaps(px + c * scaleX, py + r * scaleY,
+                             px + (c + 1) * scaleX, py + (r + 1) * scaleY)) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
+// Collision depends on the dino: flying dinos use their pixel hitbox, others use the tread hitbox
 function collides(obs) {
     if (DINOS[game.mode].flight) {
-        return player.x < obs.x + obs.width &&
-               player.x + player.width > obs.x &&
-               player.y < obs.y + obs.height &&
-               player.y + player.height > obs.y;
+        return playerPteroHitsObstacle(obs);
     }
     return playerHitsObstacle(obs);
 }
