@@ -69,11 +69,11 @@ function pickObstacleType() {
     // T-Rex keeps the original distribution
     if (game.score < (2500 / 3)) {
         if (rand < 0.1 * game.score / (2500 / 3)) return 3;
-        if (rand < 0.4) return 2;
+        if (rand < 0.4) return 5;
         return 1;
     }
     if (rand < 0.1) return 3;
-    if (rand < 0.4) return 2;
+    if (rand < 0.4) return 5;
     return 1;
 }
 
@@ -148,11 +148,15 @@ function spawnObstacle() {
         yvel = null;
     } else if (obtype == 5) {
         // Type 5: Enemy pterodactyl flying at altitude
-        height = 24;
-        width = 42;
+        height = 32;
+        width = 40;
         leftarm = false;
         rightarm = false;
-        y = FLIGHT_MIN_Y + 10 + Math.random() * (game.groundY - player.height - 60 - FLIGHT_MIN_Y);
+        if (game.mode === 'pterodactyl'){
+            y = FLIGHT_MIN_Y + 10 + Math.random() * (game.groundY - player.height - 60 - FLIGHT_MIN_Y);
+        } else {
+            y = game.groundY - 60 - Math.random() * 40;
+        }
         baseY = y;
         yvel = null;
     }
@@ -325,9 +329,11 @@ function update(timeScale) {
                 if (Math.abs(obs.yvel) < 0.12) obs.yvel = 0;
             }
         }
-        // Flying enemies bob up and down
-        if (obs.obtype == 5 && obs.baseY != null) {
-            obs.y = obs.baseY + Math.sin(game.score / 20) * 40;
+        // Flying enemies bob up and down if pterodactyl
+        if (game.mode === 'pterodactyl'){
+            if (obs.obtype == 5 && obs.baseY != null) {
+                obs.y = obs.baseY + Math.sin(game.score / 20) * 40;
+            }
         }
         // Remove obstacles that left the screen
         if (obs.x + obs.width < -30) {
